@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -211,4 +212,55 @@ func renderLine(line model.Line) {
 		fmt.Printf("\n")
 	}
 	fmt.Println("─────────────────────────────────────────────")
+}
+
+/// STATION
+
+func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, error) {
+	arrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "elizabeth-line", 10)
+	if err != nil {
+		return nil, err
+	}
+
+	return arrivals, nil
+}
+
+func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string) error {
+	fmt.Println(station)
+
+	nextArrivals := map[string][]string{}
+
+	for _, a := range arrivals {
+		// fmt.Printf("%v\n", a)
+
+		if stripRailStation(a.StationName) != station {
+			continue
+		}
+
+		platform := fmt.Sprintf("Platform %s", a.PlatformName)
+
+		d := time.Duration(a.TimeToStation) * time.Second
+
+		departure := fmt.Sprintf("%s - %.0fmins", stripRailStation(a.DestinationName), d.Minutes())
+
+		nextArrivals[platform] = append(nextArrivals[platform], departure)
+	}
+
+	for platform, arrivals := range nextArrivals {
+		fmt.Println(platform)
+
+		for _, a := range arrivals {
+			fmt.Println(a)
+		}
+
+		fmt.Println()
+	}
+
+	return nil
+}
+
+func stripRailStation(station string) string {
+	s := strings.Split(station, " Rail Station")
+
+	return s[0]
 }
