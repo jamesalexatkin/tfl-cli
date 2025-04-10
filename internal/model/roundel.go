@@ -97,7 +97,7 @@ func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 			Bar:  color.New(color.FgRed),
 		}
 	// Elizabeth Line
-	case "Elizabeth Line":
+	case "Elizabeth line":
 		return RoundelColour{
 			Disc: color.New(color.FgMagenta),
 			Bar:  color.New(color.FgBlue),
