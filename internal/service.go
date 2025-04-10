@@ -230,8 +230,6 @@ func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, err
 func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string) error {
 	fmt.Println(station)
 
-	// nextArrivals := map[string][]string{}
-
 	board := model.Board{
 		StationName: station,
 	}
@@ -243,8 +241,6 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 		if stripRailStation(a.StationName) != station {
 			continue
 		}
-
-		// platform := fmt.Sprintf("Platform %s", a.PlatformName)
 
 		currentPlatform, ok := platforms[a.PlatformName]
 		if !ok {
@@ -270,26 +266,7 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 			Destination:         a.DestinationName,
 			MinutesUntilArrival: int(d.Minutes()),
 		})
-
-		// departure := fmt.Sprintf("%s - %.0fmins", stripRailStation(a.DestinationName), d.Minutes())
-
-		// nextArrivals[platform] = append(nextArrivals[platform], departure)
 	}
-
-	// for platform, arrivals := range nextArrivals {
-	// 	fmt.Println(platform)
-
-	// 	for i, a := range arrivals {
-	// 		fmt.Printf("%d %s\n", i+1, a)
-	// 	}
-
-	// 	fmt.Println()
-	// }
-
-	// // fmt.Printf(exampleDepartureBoard, station)
-	// fmt.Printf(departureBoardTemplate,
-	// 	station,
-	// )
 
 	platformsSlice := []model.Platform{}
 	for _, p := range platforms {
