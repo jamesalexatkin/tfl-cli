@@ -20,6 +20,8 @@ func init() {
 	color.NoColor = !isatty.IsTerminal(os.Stdout.Fd())
 }
 
+const DefaultWidth = 50
+
 func main() {
 	appID := flag.String("app_id", "", "App ID in TfL's portal")
 	appKey := flag.String("app_key", "", "App key for TfL's Unified API")
@@ -69,7 +71,10 @@ func main() {
 						return err
 					}
 
-					service.RenderArrivals(ctx, arrivals, cmd.Args().First())
+					err = service.RenderArrivals(ctx, arrivals, cmd.Args().First(), DefaultWidth)
+					if err != nil {
+						return err
+					}
 
 					return nil
 				},

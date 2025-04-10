@@ -3,9 +3,9 @@ package internal
 import (
 	"context"
 	"fmt"
-	"internal/itoa"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 
@@ -243,9 +243,7 @@ func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, err
 	return totalArrivals, nil
 }
 
-func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string) error {
-	fmt.Println(station)
-
+func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string, width int) error {
 	board := model.Board{
 		StationName: station,
 	}
@@ -261,12 +259,9 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 		currentPlatform, ok := platforms[a.PlatformName]
 		if !ok {
 			currentPlatform = model.Platform{
-				Name:     a.PlatformName,
-				LineName: a.LineName,
-				Color:    model.RoundelColour{
-					// Disc: ColorPurple,
-						// Bar:  ColorBlue,
-				},          // TODO: set properly
+				Name:       a.PlatformName,
+				LineName:   a.LineName,
+				Color:      determineRoundelColour(a.LineName),
 				Departures: []model.Departure{},
 			}
 		}
@@ -291,27 +286,19 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 	}
 
 	board.Platforms = platformsSlice
-	s.RenderDepartureBoard(ctx, board)
+	err := s.RenderDepartureBoard(ctx, board, width)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-const (
-	ColorReset  = "\033[0m"
-	ColorPurple = "\033[35m"
-	ColorCyan   = "\033[36m"
-	ColorBlue   = "\033[34m"
-	ColorGreen  = "\033[32m"
-)
-
 func getRoundelStrings(colour model.RoundelColour) []string {
-	discColour := color.New(color.FgMagenta)
-	barColour := color.New(color.FgBlue)
-
 	return []string{
-		discColour.Sprint(" ╭───╮"),
-		barColour.Sprint("───────"),
-		discColour.Sprint(" ╰───╯"),
+		colour.Disc.Sprint(" ╭───╮"),
+		colour.Bar.Sprint("───────"),
+		colour.Disc.Sprint(" ╰───╯"),
 	}
 }
 
@@ -325,8 +312,10 @@ func centerText(width int, text string) string {
 }
 
 func renderPlatform(p model.Platform) []string {
+	bold := color.New(color.Bold)
+
 	roundel := getRoundelStrings(p.Color)
-	header := fmt.Sprintf("%s │", centerText(28, fmt.Sprintf("Platform %s (%s)", p.Name, p.LineName)))
+	header := fmt.Sprintf("%s │", centerText(28, bold.Sprint(fmt.Sprintf("Platform %s (%s)", p.Name, p.LineName))))
 
 	lines := []string{}
 	lines = append(lines, fmt.Sprintf("│ %s%s", roundel[0], "                               │"))
@@ -334,9 +323,10 @@ func renderPlatform(p model.Platform) []string {
 	lines = append(lines, fmt.Sprintf("│ %s%s", roundel[2], "                               │"))
 	lines = append(lines, "├──────────────────────────────────────┤")
 
+	yellowBold := color.New(color.FgYellow, color.Bold)
 	for i, dep := range p.Departures {
-		line := fmt.Sprintf("| %s %s - %dmins", color.YellowString(itoa.Itoa(i+1)), dep.Destination, dep.MinutesUntilArrival)
-		lines = append(lines, padRight(line, 38)+"|")
+		line := fmt.Sprintf("│ %s %s - %dmins", yellowBold.Sprint(strconv.FormatInt(int64(i+1), 10)), dep.Destination, dep.MinutesUntilArrival)
+		lines = append(lines, padRight(line, 38)+"│")
 	}
 
 	// Padding if fewer than 4 departures
@@ -348,10 +338,16 @@ func renderPlatform(p model.Platform) []string {
 	return lines
 }
 
-func (s *Service) RenderDepartureBoard(ctx context.Context, b model.Board) error {
+func (s *Service) RenderDepartureBoard(ctx context.Context, b model.Board, width int) error {
+	// Deal with no data
+	if len(b.Platforms) == 0 {
+		return ErrNoStationFound
+	}
+
+	bold := color.New(color.Bold)
 	output := []string{
 		"   ╭────────────────────────────────╮",
-		fmt.Sprintf("┌──┤ %-30s ├──┐", b.StationName),
+		fmt.Sprintf("┌──┤ %-30s ├──┐", bold.Sprint(b.StationName)),
 		"│  └────────────────────────────────┘  │",
 	}
 
@@ -375,58 +371,111 @@ func stripRailStation(station string) string {
 	return s[0]
 }
 
-var minisculeRoundel = `
- ╭───╮
-───────
- ╰───╯
-`
-
-var exampleDepartureBoard = `
-   ╭────────────────────────────────╮
-┌──┤ %s                             ├──┐
-|  └────────────────────────────────┘  |
-│  ╭───╮                               |
-| ───────  Platform 3 (Elizabeth Line) |
-|  ╰───╯                               │
-├──────────────────────────────────────|
-| 1 Heathrow Terminal 4 - 5mins        |
-| 2 Heathrow Terminal 4 - 14mins       |
-| 3 Heathrow Terminal 4 - 29mins       |
-| 4 Heathrow Terminal 4 - 44mins       |
-|                                      |
-├──────────────────────────────────────|
-│  ╭───╮                               |
-| ───────  Platform 4 (Elizabeth Line) |
-|  ╰───╯                               │
-├──────────────────────────────────────|
-| 1 Heathrow Terminal 4 - 5mins        |
-| 2 Heathrow Terminal 4 - 14mins       |
-| 3 Heathrow Terminal 4 - 29mins       |
-| 4 Heathrow Terminal 4 - 44mins       |
-└──────────────────────────────────────┘
-`
-
-var departureBoardTemplate = `
-   ╭────────────────────────────────╮
-┌──┤ %-10s ├──┐
-|  └────────────────────────────────┘  |
-│  ╭───╮                               |
-| ───────  %s (%s) |
-|  ╰───╯                               │
-├──────────────────────────────────────|
-| 1 %s - %dmins        |
-| 2 %s - %dmins       |
-| 3 Heathrow Terminal 4 - %dmins       |
-| 4 Heathrow Terminal 4 - %dmins       |
-|                                      |
-├──────────────────────────────────────|
-│  ╭───╮                               |
-| ───────  %s (%s) |
-|  ╰───╯                               │
-├──────────────────────────────────────|
-| 1 Heathrow Terminal 4 - %dmins        |
-| 2 Heathrow Terminal 4 - %dmins       |
-| 3 Heathrow Terminal 4 - %dmins       |
-| 4 Heathrow Terminal 4 - %dmins       |
-└──────────────────────────────────────┘
-`
+func determineRoundelColour(lineName string) model.RoundelColour {
+	switch lineName {
+	// Tube
+	case "Bakerloo":
+		return model.RoundelColour{
+			Disc: color.RGB(178, 99, 0),
+			Bar:  color.RGB(178, 99, 0),
+		}
+	case "Central":
+		return model.RoundelColour{
+			Disc: color.New(color.FgRed),
+			Bar:  color.New(color.FgRed),
+		}
+	case "Circle":
+		return model.RoundelColour{
+			Disc: color.New(color.FgYellow),
+			Bar:  color.New(color.FgYellow),
+		}
+	case "District":
+		return model.RoundelColour{
+			Disc: color.New(color.FgGreen),
+			Bar:  color.New(color.FgGreen),
+		}
+	case "Hammersmith & City":
+		return model.RoundelColour{
+			Disc: color.RGB(244, 169, 190),
+			Bar:  color.RGB(244, 169, 190),
+		}
+	case "Jubilee":
+		return model.RoundelColour{
+			Disc: color.New(color.FgWhite),
+			Bar:  color.New(color.FgWhite),
+		}
+	case "Metropolitan":
+		return model.RoundelColour{
+			Disc: color.New(color.FgMagenta),
+			Bar:  color.New(color.FgMagenta),
+		}
+	case "Northern":
+		return model.RoundelColour{
+			Disc: color.New(color.FgBlack),
+			Bar:  color.New(color.FgBlack),
+		}
+	case "Piccadilly":
+		return model.RoundelColour{
+			Disc: color.New(color.FgBlue),
+			Bar:  color.New(color.FgBlue),
+		}
+	case "Victoria":
+		return model.RoundelColour{
+			Disc: color.RGB(0, 152, 216),
+			Bar:  color.RGB(0, 152, 216),
+		}
+	case "Waterloo & City":
+		return model.RoundelColour{
+			Disc: color.New(color.FgCyan),
+			Bar:  color.New(color.FgCyan),
+		}
+	// Overground
+	case "Liberty":
+		return model.RoundelColour{
+			Disc: color.New(color.FgWhite),
+			Bar:  color.New(color.FgWhite),
+		}
+	case "Lioness":
+		return model.RoundelColour{
+			Disc: color.New(color.FgYellow),
+			Bar:  color.New(color.FgYellow),
+		}
+	case "Mildmay":
+		return model.RoundelColour{
+			Disc: color.New(color.FgBlue),
+			Bar:  color.New(color.FgBlue),
+		}
+	case "Suffragette":
+		return model.RoundelColour{
+			Disc: color.New(color.FgGreen),
+			Bar:  color.New(color.FgGreen),
+		}
+	case "Weaver":
+		return model.RoundelColour{
+			Disc: color.New(color.FgMagenta),
+			Bar:  color.New(color.FgMagenta),
+		}
+	case "Windrush":
+		return model.RoundelColour{
+			Disc: color.New(color.FgRed),
+			Bar:  color.New(color.FgRed),
+		}
+	// Elizabeth Line
+	case "Elizabeth Line":
+		return model.RoundelColour{
+			Disc: color.New(color.FgMagenta),
+			Bar:  color.New(color.FgBlue),
+		}
+	// DLR
+	case "DLR":
+		return model.RoundelColour{
+			Disc: color.New(color.FgCyan),
+			Bar:  color.New(color.FgBlue),
+		}
+	default:
+		return model.RoundelColour{
+			Disc: color.New(color.FgWhite),
+			Bar:  color.New(color.FgWhite),
+		}
+	}
+}
