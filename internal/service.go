@@ -103,7 +103,7 @@ func (s *Service) RenderStatus(ctx context.Context, status *model.TfLStatus) err
 
 	fmt.Println("┌───────────────────────────")
 	bold.Println("LONDON UNDERGROUND")
-	renderRoundel(color.New(color.FgRed), color.New(color.FgBlue))
+	renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
 	renderLine(status.Underground.Bakerloo)
 	renderLine(status.Underground.Central)
 	renderLine(status.Underground.Circle)
@@ -118,16 +118,16 @@ func (s *Service) RenderStatus(ctx context.Context, status *model.TfLStatus) err
 
 	fmt.Println("┌───────────────────────────")
 	bold.Println("LONDON OVERGROUND")
-	renderRoundel(color.RGB(239, 123, 16), color.New(color.FgBlue))
+	renderASCIIRoundel(color.RGB(239, 123, 16), color.New(color.FgBlue))
 
 	fmt.Println("┌───────────────────────────")
 	bold.Println("ELIZABETH LINE")
-	renderRoundel(color.New(color.FgMagenta), color.New(color.FgBlue))
+	renderASCIIRoundel(color.New(color.FgMagenta), color.New(color.FgBlue))
 	renderLine(status.ElizabethLine)
 
 	fmt.Println("┌───────────────────────────")
 	bold.Println("DLR")
-	renderRoundel(color.New(color.FgCyan), color.New(color.FgBlue))
+	renderASCIIRoundel(color.New(color.FgCyan), color.New(color.FgBlue))
 	renderLine(status.DLR)
 
 	fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
@@ -163,7 +163,7 @@ var tinyRoundel = `
 
 `
 
-func renderRoundel(discColour *color.Color, barColour *color.Color) {
+func renderASCIIRoundel(discColour *color.Color, barColour *color.Color) {
 
 	for _, char := range tinyRoundel {
 		switch char {
@@ -217,6 +217,8 @@ func renderLine(line model.Line) {
 /// STATION
 
 func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, error) {
+	// TODO: Get StopPoint using /StopPoint/Search/{query}
+
 	arrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "elizabeth-line", 10)
 	if err != nil {
 		return nil, err
@@ -228,32 +230,146 @@ func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, err
 func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string) error {
 	fmt.Println(station)
 
-	nextArrivals := map[string][]string{}
+	// nextArrivals := map[string][]string{}
+
+	board := model.Board{
+		StationName: station,
+	}
+
+	platforms := map[string]model.Platform{}
 
 	for _, a := range arrivals {
-		// fmt.Printf("%v\n", a)
 
 		if stripRailStation(a.StationName) != station {
 			continue
 		}
 
-		platform := fmt.Sprintf("Platform %s", a.PlatformName)
+		// platform := fmt.Sprintf("Platform %s", a.PlatformName)
+
+		currentPlatform, ok := platforms[a.PlatformName]
+		if !ok {
+			platforms[a.PlatformName] = model.Platform{
+				Name:     a.PlatformName,
+				LineName: a.LineName,
+				Color:    model.RoundelColour{
+					// Disc: ColorPurple,
+						// Bar:  ColorBlue,
+				},          // TODO: set properly
+				Departures: []model.Departure{},
+			}
+		}
+
+		// Cap at 4 departures
+		if len(currentPlatform.Departures) >= 4 {
+			continue
+		}
 
 		d := time.Duration(a.TimeToStation) * time.Second
 
-		departure := fmt.Sprintf("%s - %.0fmins", stripRailStation(a.DestinationName), d.Minutes())
+		currentPlatform.Departures = append(currentPlatform.Departures, model.Departure{
+			Destination:         a.DestinationName,
+			MinutesUntilArrival: int(d.Minutes()),
+		})
 
-		nextArrivals[platform] = append(nextArrivals[platform], departure)
+		// departure := fmt.Sprintf("%s - %.0fmins", stripRailStation(a.DestinationName), d.Minutes())
+
+		// nextArrivals[platform] = append(nextArrivals[platform], departure)
 	}
 
-	for platform, arrivals := range nextArrivals {
-		fmt.Println(platform)
+	// for platform, arrivals := range nextArrivals {
+	// 	fmt.Println(platform)
 
-		for _, a := range arrivals {
-			fmt.Println(a)
-		}
+	// 	for i, a := range arrivals {
+	// 		fmt.Printf("%d %s\n", i+1, a)
+	// 	}
 
-		fmt.Println()
+	// 	fmt.Println()
+	// }
+
+	// // fmt.Printf(exampleDepartureBoard, station)
+	// fmt.Printf(departureBoardTemplate,
+	// 	station,
+	// )
+
+	platformsSlice := []model.Platform{}
+	for _, p := range platforms {
+		platformsSlice = append(platformsSlice, p)
+	}
+
+	board.Platforms = platformsSlice
+	s.RenderDepartureBoard(ctx, board)
+
+	return nil
+}
+
+const (
+	ColorReset  = "\033[0m"
+	ColorPurple = "\033[35m"
+	ColorCyan   = "\033[36m"
+	ColorBlue   = "\033[34m"
+	ColorGreen  = "\033[32m"
+)
+
+func getRoundelStrings(colour model.RoundelColour) []string {
+	discColour := color.New(color.FgMagenta)
+	barColour := color.New(color.FgBlue)
+
+	return []string{
+		discColour.Sprint(" ╭───╮"),
+		barColour.Sprint("───────"),
+		discColour.Sprint(" ╰───╯"),
+	}
+}
+
+func padRight(str string, length int) string {
+	return fmt.Sprintf("%-*s", length, str)
+}
+
+func centerText(width int, text string) string {
+	padding := (width - len(text)) / 2
+	return fmt.Sprintf("%*s%s%*s", padding, "", text, width-padding-len(text), "")
+}
+
+func renderPlatform(p model.Platform) []string {
+	roundel := getRoundelStrings(p.Color)
+	header := fmt.Sprintf("%s │", centerText(28, fmt.Sprintf("Platform %s (%s)", p.Name, p.LineName)))
+
+	lines := []string{}
+	lines = append(lines, fmt.Sprintf("│ %s%s", roundel[0], "                               │"))
+	lines = append(lines, fmt.Sprintf("│ %s %s", roundel[1], header))
+	lines = append(lines, fmt.Sprintf("│ %s%s", roundel[2], "                               │"))
+	lines = append(lines, "├──────────────────────────────────────┤")
+
+	for i, dep := range p.Departures {
+		line := fmt.Sprintf("| %d %s - %dmins", i+1, dep.Destination, dep.MinutesUntilArrival)
+		lines = append(lines, padRight(line, 38)+"|")
+	}
+
+	// Padding if fewer than 4 departures
+	for i := len(p.Departures); i < 4; i++ {
+		lines = append(lines, "│                                      │")
+	}
+
+	lines = append(lines, "├──────────────────────────────────────┤")
+	return lines
+}
+
+func (s *Service) RenderDepartureBoard(ctx context.Context, b model.Board) error {
+	output := []string{
+		"   ╭────────────────────────────────╮",
+		fmt.Sprintf("┌──┤ %-30s ├──┐", b.StationName),
+		"│  └────────────────────────────────┘  │",
+	}
+
+	for _, p := range b.Platforms {
+		lines := renderPlatform(p)
+		output = append(output, lines...)
+	}
+
+	output = append(output, "└──────────────────────────────────────┘\n")
+
+	for _, line := range output {
+		fmt.Println(line)
 	}
 
 	return nil
@@ -264,3 +380,59 @@ func stripRailStation(station string) string {
 
 	return s[0]
 }
+
+var minisculeRoundel = `
+ ╭───╮
+───────
+ ╰───╯
+`
+
+var exampleDepartureBoard = `
+   ╭────────────────────────────────╮
+┌──┤ %s                             ├──┐
+|  └────────────────────────────────┘  |
+│  ╭───╮                               |
+| ───────  Platform 3 (Elizabeth Line) |
+|  ╰───╯                               │
+├──────────────────────────────────────|
+| 1 Heathrow Terminal 4 - 5mins        |
+| 2 Heathrow Terminal 4 - 14mins       |
+| 3 Heathrow Terminal 4 - 29mins       |
+| 4 Heathrow Terminal 4 - 44mins       |
+|                                      |
+├──────────────────────────────────────|
+│  ╭───╮                               |
+| ───────  Platform 4 (Elizabeth Line) |
+|  ╰───╯                               │
+├──────────────────────────────────────|
+| 1 Heathrow Terminal 4 - 5mins        |
+| 2 Heathrow Terminal 4 - 14mins       |
+| 3 Heathrow Terminal 4 - 29mins       |
+| 4 Heathrow Terminal 4 - 44mins       |
+└──────────────────────────────────────┘
+`
+
+var departureBoardTemplate = `
+   ╭────────────────────────────────╮
+┌──┤ %-10s ├──┐
+|  └────────────────────────────────┘  |
+│  ╭───╮                               |
+| ───────  %s (%s) |
+|  ╰───╯                               │
+├──────────────────────────────────────|
+| 1 %s - %dmins        |
+| 2 %s - %dmins       |
+| 3 Heathrow Terminal 4 - %dmins       |
+| 4 Heathrow Terminal 4 - %dmins       |
+|                                      |
+├──────────────────────────────────────|
+│  ╭───╮                               |
+| ───────  %s (%s) |
+|  ╰───╯                               │
+├──────────────────────────────────────|
+| 1 Heathrow Terminal 4 - %dmins        |
+| 2 Heathrow Terminal 4 - %dmins       |
+| 3 Heathrow Terminal 4 - %dmins       |
+| 4 Heathrow Terminal 4 - %dmins       |
+└──────────────────────────────────────┘
+`

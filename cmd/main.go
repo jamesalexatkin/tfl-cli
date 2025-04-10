@@ -8,10 +8,17 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/jamesalexatkin/tfl-golang"
+	"github.com/mattn/go-isatty"
 	"github.com/schachmat/ingo"
 	"github.com/urfave/cli/v3"
 )
+
+func init() {
+	// Turn off color if not running in a proper terminal
+	color.NoColor = !isatty.IsTerminal(os.Stdout.Fd())
+}
 
 func main() {
 	appID := flag.String("app_id", "", "App ID in TfL's portal")
