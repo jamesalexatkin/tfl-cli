@@ -219,12 +219,27 @@ func renderLine(line model.Line) {
 func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, error) {
 	// TODO: Get StopPoint using /StopPoint/Search/{query}
 
-	arrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "elizabeth-line", 10)
+	totalArrivals := []tfl.Prediction{}
+
+	undergroundArrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "tube", 10)
 	if err != nil {
 		return nil, err
 	}
+	totalArrivals = append(totalArrivals, undergroundArrivals...)
 
-	return arrivals, nil
+	overgroundArrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "overground", 10)
+	if err != nil {
+		return nil, err
+	}
+	totalArrivals = append(totalArrivals, overgroundArrivals...)
+
+	elizabethLineArrivals, err := s.TFLClient.GetArrivalPredictionsForMode(ctx, "elizabeth-line", 10)
+	if err != nil {
+		return nil, err
+	}
+	totalArrivals = append(totalArrivals, elizabethLineArrivals...)
+
+	return totalArrivals, nil
 }
 
 func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string) error {
@@ -244,7 +259,7 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 
 		currentPlatform, ok := platforms[a.PlatformName]
 		if !ok {
-			platforms[a.PlatformName] = model.Platform{
+			currentPlatform = model.Platform{
 				Name:     a.PlatformName,
 				LineName: a.LineName,
 				Color:    model.RoundelColour{
@@ -263,9 +278,10 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 		d := time.Duration(a.TimeToStation) * time.Second
 
 		currentPlatform.Departures = append(currentPlatform.Departures, model.Departure{
-			Destination:         a.DestinationName,
+			Destination:         stripRailStation(a.DestinationName),
 			MinutesUntilArrival: int(d.Minutes()),
 		})
+		platforms[a.PlatformName] = currentPlatform
 	}
 
 	platformsSlice := []model.Platform{}
