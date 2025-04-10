@@ -325,8 +325,15 @@ func renderPlatform(p model.Platform, width int) []string {
 	bold := color.New(color.Bold)
 
 	roundel := getRoundelStrings(p.Color)
-	// header := fmt.Sprintf("%s", centerText(28, bold.Sprint(fmt.Sprintf("Platform %s (%s)", p.Name, p.LineName))))
-	header := fmt.Sprintf("%s  ", bold.Sprint(fmt.Sprintf("Platform %s (%s)", p.Name, p.LineName)))
+
+	// Default of 'Platform X'
+	platformName := "Platform " + p.Name
+	if strings.Contains(p.Name, "Platform") {
+		// Some platforms are formatted differently so we just take the raw name if so
+		// e.g. 'Eastbound - Platform 3' at North Acton
+		platformName = p.Name
+	}
+	header := fmt.Sprintf("%s  ", bold.Sprint(fmt.Sprintf("%s (%s)", platformName, p.LineName)))
 
 	lines := []string{}
 	roundelTopContent := fmt.Sprintf("│ %s", roundel[0])
