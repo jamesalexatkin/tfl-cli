@@ -20,7 +20,7 @@ func init() {
 	color.NoColor = !isatty.IsTerminal(os.Stdout.Fd())
 }
 
-const DefaultWidth = 60
+const DefaultWidth = 70
 
 func main() {
 	appID := flag.String("app_id", "", "App ID in TfL's portal")
