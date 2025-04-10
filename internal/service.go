@@ -252,7 +252,7 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 
 	for _, a := range arrivals {
 
-		if stripRailStation(a.StationName) != station {
+		if stripStationName(a.StationName) != station {
 			continue
 		}
 
@@ -261,7 +261,7 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 			currentPlatform = model.Platform{
 				Name:       a.PlatformName,
 				LineName:   a.LineName,
-				Color:      determineRoundelColour(a.LineName),
+				Color:      model.CreateRoundelColourFromLineName(a.LineName),
 				Departures: []model.Departure{},
 			}
 		}
@@ -274,7 +274,7 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 		d := time.Duration(a.TimeToStation) * time.Second
 
 		currentPlatform.Departures = append(currentPlatform.Departures, model.Departure{
-			Destination:         stripRailStation(a.DestinationName),
+			Destination:         stripStationName(a.DestinationName),
 			MinutesUntilArrival: int(d.Minutes()),
 		})
 		platforms[a.PlatformName] = currentPlatform
@@ -365,117 +365,17 @@ func (s *Service) RenderDepartureBoard(ctx context.Context, b model.Board, width
 	return nil
 }
 
-func stripRailStation(station string) string {
-	s := strings.Split(station, " Rail Station")
-
-	return s[0]
-}
-
-func determineRoundelColour(lineName string) model.RoundelColour {
-	switch lineName {
-	// Tube
-	case "Bakerloo":
-		return model.RoundelColour{
-			Disc: color.RGB(178, 99, 0),
-			Bar:  color.RGB(178, 99, 0),
-		}
-	case "Central":
-		return model.RoundelColour{
-			Disc: color.New(color.FgRed),
-			Bar:  color.New(color.FgRed),
-		}
-	case "Circle":
-		return model.RoundelColour{
-			Disc: color.New(color.FgYellow),
-			Bar:  color.New(color.FgYellow),
-		}
-	case "District":
-		return model.RoundelColour{
-			Disc: color.New(color.FgGreen),
-			Bar:  color.New(color.FgGreen),
-		}
-	case "Hammersmith & City":
-		return model.RoundelColour{
-			Disc: color.RGB(244, 169, 190),
-			Bar:  color.RGB(244, 169, 190),
-		}
-	case "Jubilee":
-		return model.RoundelColour{
-			Disc: color.New(color.FgWhite),
-			Bar:  color.New(color.FgWhite),
-		}
-	case "Metropolitan":
-		return model.RoundelColour{
-			Disc: color.New(color.FgMagenta),
-			Bar:  color.New(color.FgMagenta),
-		}
-	case "Northern":
-		return model.RoundelColour{
-			Disc: color.New(color.FgBlack),
-			Bar:  color.New(color.FgBlack),
-		}
-	case "Piccadilly":
-		return model.RoundelColour{
-			Disc: color.New(color.FgBlue),
-			Bar:  color.New(color.FgBlue),
-		}
-	case "Victoria":
-		return model.RoundelColour{
-			Disc: color.RGB(0, 152, 216),
-			Bar:  color.RGB(0, 152, 216),
-		}
-	case "Waterloo & City":
-		return model.RoundelColour{
-			Disc: color.New(color.FgCyan),
-			Bar:  color.New(color.FgCyan),
-		}
-	// Overground
-	case "Liberty":
-		return model.RoundelColour{
-			Disc: color.New(color.FgWhite),
-			Bar:  color.New(color.FgWhite),
-		}
-	case "Lioness":
-		return model.RoundelColour{
-			Disc: color.New(color.FgYellow),
-			Bar:  color.New(color.FgYellow),
-		}
-	case "Mildmay":
-		return model.RoundelColour{
-			Disc: color.New(color.FgBlue),
-			Bar:  color.New(color.FgBlue),
-		}
-	case "Suffragette":
-		return model.RoundelColour{
-			Disc: color.New(color.FgGreen),
-			Bar:  color.New(color.FgGreen),
-		}
-	case "Weaver":
-		return model.RoundelColour{
-			Disc: color.New(color.FgMagenta),
-			Bar:  color.New(color.FgMagenta),
-		}
-	case "Windrush":
-		return model.RoundelColour{
-			Disc: color.New(color.FgRed),
-			Bar:  color.New(color.FgRed),
-		}
-	// Elizabeth Line
-	case "Elizabeth Line":
-		return model.RoundelColour{
-			Disc: color.New(color.FgMagenta),
-			Bar:  color.New(color.FgBlue),
-		}
-	// DLR
-	case "DLR":
-		return model.RoundelColour{
-			Disc: color.New(color.FgCyan),
-			Bar:  color.New(color.FgBlue),
-		}
-	default:
-		return model.RoundelColour{
-			Disc: color.New(color.FgWhite),
-			Bar:  color.New(color.FgWhite),
-		}
+func stripStationName(station string) string {
+	stringsToStrip := []string{
+		" Underground Station",
+		" Rail Station",
+		" (Berks)",
 	}
+
+	strippedStation := station
+	for _, s := range stringsToStrip {
+		strippedStation = strings.Split(strippedStation, s)[0]
+	}
+
+	return strippedStation
 }
