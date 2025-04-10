@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"internal/itoa"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
 	"strings"
@@ -334,7 +335,7 @@ func renderPlatform(p model.Platform) []string {
 	lines = append(lines, "├──────────────────────────────────────┤")
 
 	for i, dep := range p.Departures {
-		line := fmt.Sprintf("| %d %s - %dmins", i+1, dep.Destination, dep.MinutesUntilArrival)
+		line := fmt.Sprintf("| %s %s - %dmins", color.YellowString(itoa.Itoa(i+1)), dep.Destination, dep.MinutesUntilArrival)
 		lines = append(lines, padRight(line, 38)+"|")
 	}
 
