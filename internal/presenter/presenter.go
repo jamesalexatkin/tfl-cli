@@ -7,11 +7,141 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 )
 
 type Presenter struct {
+}
+
+var smallRoundel = `      
+       RRRRRRRRR          
+    RRRRR     RRRRR      
+   RRRR         RRRR   
+ BBBBBBBBBBBBBBBBBBBBB 
+ BBBBBBBBBBBBBBBBBBBBB 
+   RRRR         RRRR   
+    RRRRR     RRRRR     
+       RRRRRRRRR        
+
+`
+
+var tinyRoundel = `      
+      RRRRRR          
+    RRR    RRR       
+   BBBBBBBBBBBB        
+    RRR    RRR 
+      RRRRRR         
+
+`
+
+func renderASCIIRoundel(discColour *color.Color, barColour *color.Color) {
+
+	for _, char := range tinyRoundel {
+		switch char {
+		case 'R':
+			discColour.Print("O")
+		case 'B':
+			barColour.Print("=")
+		case '\n':
+			fmt.Println("")
+		default:
+			fmt.Print(" ")
+		}
+
+	}
+}
+
+func renderLine(line model.Line) {
+	// fmt.Println("─────────────────────────────────────────────")
+	roundelColour := model.CreateRoundelColourFromLineName(line.Name)
+	fmt.Println(
+		fmt.Sprintf("%s %s:", roundelColour.Disc.Sprint("█"), color.New(color.Bold).Sprint(line.Name)),
+	)
+
+	for _, ls := range line.LineStatuses {
+		fmt.Print("\t")
+
+		var disruptionColor color.Color
+		switch ls.StatusSeverityDescription {
+		case "Good Service":
+			disruptionColor = *color.New(color.FgGreen)
+		case "Minor Delays":
+			disruptionColor = *color.New(color.FgYellow)
+		case "Severe Delays":
+			disruptionColor = *color.New(color.FgRed)
+		case "Reduced Service", "Part Suspended":
+			disruptionColor = *color.New(color.FgMagenta)
+		default:
+			disruptionColor = *color.New(color.FgWhite)
+		}
+
+		disruptionColor.Print(ls.StatusSeverityDescription)
+
+		if ls.Reason != "" {
+			fmt.Printf(" - %s", ls.Reason)
+		}
+
+		fmt.Printf("\n")
+	}
+	fmt.Println("─────────────────────────────────────────────")
+}
+
+func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus) error {
+	bold := color.New(color.Bold)
+
+	fmt.Println("┌───────────────────────────")
+	bold.Println("LONDON UNDERGROUND")
+	// renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
+	tubeRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("tube"))
+	for _, line := range tubeRoundel {
+		fmt.Println(line)
+	}
+	renderLine(status.Underground.Bakerloo)
+	renderLine(status.Underground.Central)
+	renderLine(status.Underground.Circle)
+	renderLine(status.Underground.District)
+	renderLine(status.Underground.HammersmithAndCity)
+	renderLine(status.Underground.Jubilee)
+	renderLine(status.Underground.Metropolitan)
+	renderLine(status.Underground.Northern)
+	renderLine(status.Underground.Piccadilly)
+	renderLine(status.Underground.Victoria)
+	renderLine(status.Underground.WaterlooAndCity)
+
+	fmt.Println("┌───────────────────────────")
+	bold.Println("LONDON OVERGROUND")
+	overgroundRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("overground"))
+	for _, line := range overgroundRoundel {
+		fmt.Println(line)
+	}
+	renderLine(status.Overground.Liberty)
+	renderLine(status.Overground.Lioness)
+	renderLine(status.Overground.Mildmay)
+	renderLine(status.Overground.Suffragette)
+	renderLine(status.Overground.Weaver)
+	renderLine(status.Overground.Windrush)
+
+	fmt.Println("┌───────────────────────────")
+	bold.Println("ELIZABETH LINE")
+	elizabethLineRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("elizabeth-line"))
+	for _, line := range elizabethLineRoundel {
+		fmt.Println(line)
+	}
+	renderLine(status.ElizabethLine)
+
+	fmt.Println("┌───────────────────────────")
+	bold.Println("DLR")
+	dlrRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("dlr"))
+	for _, line := range dlrRoundel {
+		fmt.Println(line)
+	}
+	renderLine(status.DLR)
+
+	fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
+
+	return nil
 }
 
 func (p *Presenter) RenderDepartureBoard(ctx context.Context, b model.Board, width int) error {

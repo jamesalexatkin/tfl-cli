@@ -9,6 +9,17 @@ type RoundelColour struct {
 
 func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 	switch lineName {
+	// Modes
+	case "tube":
+		return RoundelColour{
+			Disc: color.New(color.FgRed),
+			Bar:  color.New(color.FgBlue),
+		}
+	case "overground":
+		return RoundelColour{
+			Disc: color.RGB(239, 123, 16),
+			Bar:  color.New(color.FgBlue),
+		}
 	// Tube
 	case "Bakerloo":
 		return RoundelColour{
@@ -97,13 +108,13 @@ func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 			Bar:  color.New(color.FgRed),
 		}
 	// Elizabeth Line
-	case "Elizabeth line":
+	case "Elizabeth line", "elizabeth-line":
 		return RoundelColour{
 			Disc: color.New(color.FgMagenta),
 			Bar:  color.New(color.FgBlue),
 		}
 	// DLR
-	case "DLR":
+	case "DLR", "dlr":
 		return RoundelColour{
 			Disc: color.New(color.FgCyan),
 			Bar:  color.New(color.FgBlue),

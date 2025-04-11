@@ -28,10 +28,19 @@ type Underground struct {
 	WaterlooAndCity    Line
 }
 
+type Overground struct {
+	Liberty     Line
+	Lioness     Line
+	Mildmay     Line
+	Suffragette Line
+	Weaver      Line
+	Windrush    Line
+}
+
 type TfLStatus struct {
 	Time          time.Time
 	Underground   Underground
-	Overground    Line
+	Overground    Overground
 	DLR           Line
 	ElizabethLine Line
 }

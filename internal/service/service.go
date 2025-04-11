@@ -2,13 +2,11 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/jamesalexatkin/tfl-golang"
 )
 
@@ -84,7 +82,20 @@ func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 				tflStatus.Underground.WaterlooAndCity = convertLine(s)
 			}
 		case "overground":
-			tflStatus.Overground = convertLine(s)
+			switch s.Name {
+			case "Liberty":
+				tflStatus.Overground.Liberty = convertLine(s)
+			case "Lioness":
+				tflStatus.Overground.Lioness = convertLine(s)
+			case "Mildmay":
+				tflStatus.Overground.Mildmay = convertLine(s)
+			case "Suffragette":
+				tflStatus.Overground.Suffragette = convertLine(s)
+			case "Weaver":
+				tflStatus.Overground.Weaver = convertLine(s)
+			case "Windrush":
+				tflStatus.Overground.Windrush = convertLine(s)
+			}
 		case "dlr":
 			tflStatus.DLR = convertLine(s)
 		case "elizabeth-line":
@@ -97,122 +108,12 @@ func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 	return &tflStatus, nil
 }
 
-// TODO: move this into some render layer
-func (s *Service) RenderStatus(ctx context.Context, status *model.TfLStatus) error {
-	bold := color.New(color.Bold)
-
-	fmt.Println("┌───────────────────────────")
-	bold.Println("LONDON UNDERGROUND")
-	renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
-	renderLine(status.Underground.Bakerloo)
-	renderLine(status.Underground.Central)
-	renderLine(status.Underground.Circle)
-	renderLine(status.Underground.District)
-	renderLine(status.Underground.HammersmithAndCity)
-	renderLine(status.Underground.Jubilee)
-	renderLine(status.Underground.Metropolitan)
-	renderLine(status.Underground.Northern)
-	renderLine(status.Underground.Piccadilly)
-	renderLine(status.Underground.Victoria)
-	renderLine(status.Underground.WaterlooAndCity)
-
-	fmt.Println("┌───────────────────────────")
-	bold.Println("LONDON OVERGROUND")
-	renderASCIIRoundel(color.RGB(239, 123, 16), color.New(color.FgBlue))
-
-	fmt.Println("┌───────────────────────────")
-	bold.Println("ELIZABETH LINE")
-	renderASCIIRoundel(color.New(color.FgMagenta), color.New(color.FgBlue))
-	renderLine(status.ElizabethLine)
-
-	fmt.Println("┌───────────────────────────")
-	bold.Println("DLR")
-	renderASCIIRoundel(color.New(color.FgCyan), color.New(color.FgBlue))
-	renderLine(status.DLR)
-
-	fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
-
-	return nil
-}
-
 var box = `┌──────────────────────────────────┐
 │               %s                │
 ├──────────────────────────────────┤
 │ %s │
 └──────────────────────────────────┘
 `
-
-var smallRoundel = `      
-       RRRRRRRRR          
-    RRRRR     RRRRR      
-   RRRR         RRRR   
- BBBBBBBBBBBBBBBBBBBBB 
- BBBBBBBBBBBBBBBBBBBBB 
-   RRRR         RRRR   
-    RRRRR     RRRRR     
-       RRRRRRRRR        
-
-`
-
-var tinyRoundel = `      
-      RRRRRR          
-    RRR    RRR       
-   BBBBBBBBBBBB        
-    RRR    RRR 
-      RRRRRR         
-
-`
-
-func renderASCIIRoundel(discColour *color.Color, barColour *color.Color) {
-
-	for _, char := range tinyRoundel {
-		switch char {
-		case 'R':
-			discColour.Print("O")
-		case 'B':
-			barColour.Print("=")
-		case '\n':
-			fmt.Println("")
-		default:
-			fmt.Print(" ")
-		}
-
-	}
-}
-
-func renderLine(line model.Line) {
-	// fmt.Println("─────────────────────────────────────────────")
-	color.New(color.Bold).Print(line.Name)
-
-	fmt.Print(": \n")
-
-	for _, ls := range line.LineStatuses {
-		fmt.Print("\t")
-
-		var disruptionColor color.Color
-		switch ls.StatusSeverityDescription {
-		case "Good Service":
-			disruptionColor = *color.New(color.FgGreen)
-		case "Minor Delays":
-			disruptionColor = *color.New(color.FgYellow)
-		case "Severe Delays":
-			disruptionColor = *color.New(color.FgRed)
-		case "Part Suspended":
-			disruptionColor = *color.New(color.FgMagenta)
-		default:
-			disruptionColor = *color.New(color.FgWhite)
-		}
-
-		disruptionColor.Print(ls.StatusSeverityDescription)
-
-		if ls.Reason != "" {
-			fmt.Printf(" - %s", ls.Reason)
-		}
-
-		fmt.Printf("\n")
-	}
-	fmt.Println("─────────────────────────────────────────────")
-}
 
 /// STATION
 

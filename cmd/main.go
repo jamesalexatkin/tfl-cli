@@ -52,7 +52,10 @@ func main() {
 						return err
 					}
 
-					service.RenderStatus(ctx, status)
+					err = presenter.RenderStatus(ctx, status)
+					if err != nil {
+						return err
+					}
 
 					return nil
 				},
