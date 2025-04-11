@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
+	"jamesalexatkin/tfl-cli/internal/config"
 	"jamesalexatkin/tfl-cli/internal/presenter"
 	"jamesalexatkin/tfl-cli/internal/service"
 	"log"
@@ -12,7 +12,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/jamesalexatkin/tfl-golang"
 	"github.com/mattn/go-isatty"
-	"github.com/schachmat/ingo"
 	"github.com/urfave/cli/v3"
 )
 
@@ -24,15 +23,12 @@ func init() {
 const DefaultWidth = 70
 
 func main() {
-	appID := flag.String("app_id", "", "App ID in TfL's portal")
-	appKey := flag.String("app_key", "", "App key for TfL's Unified API")
-
-	// read/write config and parse flags
-	if err := ingo.Parse("tfl"); err != nil {
-		log.Fatalf("Error parsing config: %v", err)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
 	}
 
-	tflClient := tfl.New(*appID, *appKey)
+	tflClient := tfl.New(cfg.AppID, cfg.AppKey)
 
 	service := service.Service{
 		TFLClient: tflClient,
@@ -44,6 +40,15 @@ func main() {
 
 	cmd := &cli.Command{
 		Commands: []*cli.Command{
+			{
+				Name:  "show-config",
+				Usage: "Show current config",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					presenter.RenderConfig(ctx, cfg)
+
+					return nil
+				},
+			},
 			{
 				Name:  "status",
 				Usage: "Show status of all lines",
