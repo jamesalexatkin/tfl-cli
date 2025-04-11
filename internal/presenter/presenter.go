@@ -18,12 +18,15 @@ type Presenter struct {
 
 func (p *Presenter) RenderConfig(ctx context.Context, cfg *config.Config) {
 	bold := color.New(color.Bold)
+	yellow := color.New(color.FgYellow)
 
 	fmt.Println("Current configuration:")
 
-	fmt.Printf("%s: %s\n", "app_id", bold.Sprint(cfg.AppID))
-	fmt.Printf("%s: %s\n", "app_key", bold.Sprint(cfg.AppKey))
-	fmt.Printf("%s: %s\n", "departure_board_width", bold.Sprint(cfg.DepartureBoardWidth))
+	fmt.Printf("%s: %s\n", yellow.Sprint("app_id"), bold.Sprint(cfg.AppID))
+	fmt.Printf("%s: %s\n", yellow.Sprint("app_key"), bold.Sprint(cfg.AppKey))
+	fmt.Printf("%s: %s\n", yellow.Sprint("departure_board_width"), bold.Sprint(cfg.DepartureBoardWidth))
+	fmt.Printf("%s: %s\n", yellow.Sprint("home_station"), bold.Sprint(cfg.HomeStation))
+	fmt.Printf("%s: %s\n", yellow.Sprint("work_station"), bold.Sprint(cfg.WorkStation))
 }
 
 // func renderASCIIRoundel(discColour *color.Color, barColour *color.Color) {
