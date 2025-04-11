@@ -3,7 +3,6 @@ package presenter
 import (
 	"context"
 	"fmt"
-	"jamesalexatkin/tfl-cli/internal"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"regexp"
 	"strconv"
@@ -67,59 +66,212 @@ func renderLine(line model.Line, verbose bool) {
 }
 
 func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus, verbose bool) error {
+	// bold := color.New(color.Bold)
+
+	// fmt.Println("╭───────────────────────────")
+	// bold.Println("LONDON UNDERGROUND")
+	// // renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
+	// tubeRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("tube"))
+	// for _, line := range tubeRoundel {
+	// 	fmt.Println(line)
+	// }
+	// renderLine(status.Underground.Bakerloo, verbose)
+	// renderLine(status.Underground.Central, verbose)
+	// renderLine(status.Underground.Circle, verbose)
+	// renderLine(status.Underground.District, verbose)
+	// renderLine(status.Underground.HammersmithAndCity, verbose)
+	// renderLine(status.Underground.Jubilee, verbose)
+	// renderLine(status.Underground.Metropolitan, verbose)
+	// renderLine(status.Underground.Northern, verbose)
+	// renderLine(status.Underground.Piccadilly, verbose)
+	// renderLine(status.Underground.Victoria, verbose)
+	// renderLine(status.Underground.WaterlooAndCity, verbose)
+
+	// fmt.Println("╭───────────────────────────")
+	// bold.Println("LONDON OVERGROUND")
+	// overgroundRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("overground"))
+	// for _, line := range overgroundRoundel {
+	// 	fmt.Println(line)
+	// }
+	// renderLine(status.Overground.Liberty, verbose)
+	// renderLine(status.Overground.Lioness, verbose)
+	// renderLine(status.Overground.Mildmay, verbose)
+	// renderLine(status.Overground.Suffragette, verbose)
+	// renderLine(status.Overground.Weaver, verbose)
+	// renderLine(status.Overground.Windrush, verbose)
+
+	// fmt.Println("┌───────────────────────────")
+	// bold.Println("ELIZABETH LINE")
+	// elizabethLineRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("elizabeth-line"))
+	// for _, line := range elizabethLineRoundel {
+	// 	fmt.Println(line)
+	// }
+	// renderLine(status.ElizabethLine, verbose)
+
+	// fmt.Println("┌───────────────────────────")
+	// bold.Println("DLR")
+	// dlrRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("dlr"))
+	// for _, line := range dlrRoundel {
+	// 	fmt.Println(line)
+	// }
+	// renderLine(status.DLR, verbose)
+
+	// fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
+
+	p.renderNewStatus(ctx, status, verbose)
+
+	return nil
+}
+
+func getLine(line model.Line, verbose bool) string {
+	roundelColour := model.CreateRoundelColourFromLineName(line.Name)
+
+	disruption := ""
+	for _, ls := range line.LineStatuses {
+		var disruptionColor color.Color
+		switch ls.StatusSeverityDescription {
+		case "Good Service":
+			disruptionColor = *color.New(color.FgGreen)
+		case "Minor Delays":
+			disruptionColor = *color.New(color.FgYellow)
+		case "Severe Delays":
+			disruptionColor = *color.New(color.FgRed)
+		case "Reduced Service", "Part Suspended":
+			disruptionColor = *color.New(color.FgMagenta)
+		default:
+			disruptionColor = *color.New(color.FgWhite)
+		}
+
+		disruption = disruptionColor.Sprint(ls.StatusSeverityDescription)
+
+		// if ls.Reason != "" && verbose {
+		// 	fmt.Printf(" - %s", ls.Reason)
+		// }
+	}
+
+	lineContent := fmt.Sprintf("%s %s: %s",
+		roundelColour.Disc.Sprint("█"),
+		color.New(color.Bold).Sprint(line.Name),
+		disruption,
+	)
+
+	return lineContent
+}
+
+func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus, verbose bool) error {
 	bold := color.New(color.Bold)
+	italic := color.New(color.Italic)
 
-	fmt.Println("╭───────────────────────────")
-	bold.Println("LONDON UNDERGROUND")
-	// renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
-	tubeRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("tube"))
-	for _, line := range tubeRoundel {
-		fmt.Println(line)
-	}
-	renderLine(status.Underground.Bakerloo, verbose)
-	renderLine(status.Underground.Central, verbose)
-	renderLine(status.Underground.Circle, verbose)
-	renderLine(status.Underground.District, verbose)
-	renderLine(status.Underground.HammersmithAndCity, verbose)
-	renderLine(status.Underground.Jubilee, verbose)
-	renderLine(status.Underground.Metropolitan, verbose)
-	renderLine(status.Underground.Northern, verbose)
-	renderLine(status.Underground.Piccadilly, verbose)
-	renderLine(status.Underground.Victoria, verbose)
-	renderLine(status.Underground.WaterlooAndCity, verbose)
+	fmt.Println("╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮")
+	fmt.Printf("│ %s        │             │ %s         │             │ %s            │             │ %s                       │\n",
+		bold.Sprint("London Underground"),
+		bold.Sprint("London Overground"),
+		bold.Sprint("Elizabeth Line"),
+		bold.Sprint("DLR"))
+	fmt.Println("├───────────────────────────┴─────────────┼───────────────────────────┴─────────────┼───────────────────────────┴─────────────┼───────────────────────────┴─────────────┐")
 
-	fmt.Println("╭───────────────────────────")
-	bold.Println("LONDON OVERGROUND")
-	overgroundRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("overground"))
-	for _, line := range overgroundRoundel {
-		fmt.Println(line)
-	}
-	renderLine(status.Overground.Liberty, verbose)
-	renderLine(status.Overground.Lioness, verbose)
-	renderLine(status.Overground.Mildmay, verbose)
-	renderLine(status.Overground.Suffragette, verbose)
-	renderLine(status.Overground.Weaver, verbose)
-	renderLine(status.Overground.Windrush, verbose)
+	undergroundRoundel := model.CreateRoundelColourFromLineName("tube")
+	overgroundRoundel := model.CreateRoundelColourFromLineName("overground")
+	elizabethLineRoundel := model.CreateRoundelColourFromLineName("elizabeth-line")
+	dlrRoundel := model.CreateRoundelColourFromLineName("dlr")
 
-	fmt.Println("┌───────────────────────────")
-	bold.Println("ELIZABETH LINE")
-	elizabethLineRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("elizabeth-line"))
-	for _, line := range elizabethLineRoundel {
-		fmt.Println(line)
-	}
-	renderLine(status.ElizabethLine, verbose)
+	roundelTop := "╭───╮"
+	roundelMiddle := "───────"
+	roundelBottom := "╰───╯"
 
-	fmt.Println("┌───────────────────────────")
-	bold.Println("DLR")
-	dlrRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("dlr"))
-	for _, line := range dlrRoundel {
-		fmt.Println(line)
-	}
-	renderLine(status.DLR, verbose)
+	fmt.Printf("│  %s                                  │  %s                                  │  %s                                  │  %s                                  │\n",
+		undergroundRoundel.Disc.Sprint(roundelTop),
+		overgroundRoundel.Disc.Sprint(roundelTop),
+		elizabethLineRoundel.Disc.Sprint(roundelTop),
+		dlrRoundel.Disc.Sprint(roundelTop),
+	)
+	fmt.Printf("│ %s                                 │ %s                                 │ %s                                 │ %s                                 │\n",
+		undergroundRoundel.Bar.Sprint(roundelMiddle),
+		overgroundRoundel.Bar.Sprint(roundelMiddle),
+		elizabethLineRoundel.Bar.Sprint(roundelMiddle),
+		dlrRoundel.Bar.Sprint(roundelMiddle),
+	)
+	fmt.Printf("│  %s                                  │  %s                                  │  %s                                  │  %s                                  │\n",
+		undergroundRoundel.Disc.Sprint(roundelBottom),
+		overgroundRoundel.Disc.Sprint(roundelBottom),
+		elizabethLineRoundel.Disc.Sprint(roundelBottom),
+		dlrRoundel.Disc.Sprint(roundelBottom),
+	)
 
-	fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
+	emptyPadding := "                                       "
+	boxWidth := 39
 
-	fmt.Printf(internal.ExampleStatusBoard)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Bakerloo, verbose), boxWidth),
+		padRight(getLine(status.Overground.Liberty, verbose), boxWidth),
+		padRight(getLine(status.ElizabethLine, verbose), boxWidth),
+		padRight(getLine(status.DLR, verbose), boxWidth),
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Central, verbose), boxWidth),
+		padRight(getLine(status.Overground.Lioness, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Circle, verbose), boxWidth),
+		padRight(getLine(status.Overground.Mildmay, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.District, verbose), boxWidth),
+		padRight(getLine(status.Overground.Suffragette, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.HammersmithAndCity, verbose), boxWidth),
+		padRight(getLine(status.Overground.Weaver, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Jubilee, verbose), boxWidth),
+		padRight(getLine(status.Overground.Windrush, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Metropolitan, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Northern, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Piccadilly, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.Victoria, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+		emptyPadding,
+	)
+	fmt.Printf("│ %s │ %s │ %s │ %s │\n",
+		padRight(getLine(status.Underground.WaterlooAndCity, verbose), boxWidth),
+		emptyPadding,
+		emptyPadding,
+		emptyPadding,
+	)
+
+	fmt.Println("└─────────────────────────────────────────┴─────────────────────────────────────────┴─────────────────────────────────────────┴─────────────────────────────────────────┘")
+
+	italic.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
+	fmt.Println("")
 
 	return nil
 }
@@ -186,7 +338,9 @@ func generatePadding(paddingChar rune, length int) string {
 }
 
 func padRight(str string, length int) string {
-	return fmt.Sprintf("%-*s", length, str)
+	paddingAmount := length - realLen(str)
+
+	return str + generatePadding(' ', paddingAmount)
 }
 
 func centerText(width int, text string) string {
