@@ -218,7 +218,18 @@ func renderLine(line model.Line) {
 
 /// STATION
 
-func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, error) {
+func (s *Service) FetchStationArrivalsBoard(ctx context.Context, station string) (*model.Board, error) {
+	arrivals, err := s.fetchArrivals(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	board := s.convertArrivalsToBoard(ctx, station, arrivals)
+
+	return &board, nil
+}
+
+func (s *Service) fetchArrivals(ctx context.Context) ([]tfl.Prediction, error) {
 	// TODO: Get StopPoint using /StopPoint/Search/{query}
 
 	totalArrivals := []tfl.Prediction{}
@@ -244,7 +255,7 @@ func (s *Service) GetStationArrivals(ctx context.Context) ([]tfl.Prediction, err
 	return totalArrivals, nil
 }
 
-func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction, station string, width int) error {
+func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, arrivals []tfl.Prediction) model.Board {
 	board := model.Board{
 		StationName: station,
 	}
@@ -287,12 +298,8 @@ func (s *Service) RenderArrivals(ctx context.Context, arrivals []tfl.Prediction,
 	}
 
 	board.Platforms = platformsSlice
-	err := s.RenderDepartureBoard(ctx, board, width)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return board
 }
 
 func getRoundelStrings(colour model.RoundelColour) []string {
@@ -321,7 +328,7 @@ func centerText(width int, text string) string {
 	return fmt.Sprintf("%*s%s%*s", leftPadding, "", text, rightPadding, "")
 }
 
-func renderPlatform(p model.Platform, width int) []string {
+func getPlatformStrings(p model.Platform, width int) []string {
 	bold := color.New(color.Bold)
 
 	roundel := getRoundelStrings(p.Color)
@@ -378,7 +385,7 @@ func (s *Service) RenderDepartureBoard(ctx context.Context, b model.Board, width
 	}
 
 	for _, p := range b.Platforms {
-		lines := renderPlatform(p, width)
+		lines := getPlatformStrings(p, width)
 		output = append(output, lines...)
 	}
 

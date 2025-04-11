@@ -58,20 +58,21 @@ func main() {
 				Name:  "station",
 				Usage: "Show departures from a given station",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
+					stationName := cmd.Args().First()
 
-					if cmd.Args().First() == "" {
+					if stationName == "" {
 						fmt.Printf("") // TODO: print something here when there's no arg
 
 						// TODO: create NoStationError or MissingArgError
 						return nil
 					}
 
-					arrivals, err := service.GetStationArrivals(ctx)
+					arrivals, err := service.FetchStationArrivalsBoard(ctx, stationName)
 					if err != nil {
 						return err
 					}
 
-					err = service.RenderArrivals(ctx, arrivals, cmd.Args().First(), DefaultWidth)
+					err = service.RenderDepartureBoard(ctx, *arrivals, DefaultWidth)
 					if err != nil {
 						return err
 					}
