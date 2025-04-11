@@ -40,19 +40,28 @@ func main() {
 
 	presenter := presenter.Presenter{}
 
+	var statusVerbose bool
+
 	cmd := &cli.Command{
 		Commands: []*cli.Command{
 			{
 				Name:  "status",
 				Usage: "Show status of all lines",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "verbose",
+						Aliases:     []string{"v"},
+						Usage:       "Include verbose disruption detail for statuses.",
+						Destination: &statusVerbose,
+					},
+				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-
 					status, err := service.GetStatus(ctx)
 					if err != nil {
 						return err
 					}
 
-					err = presenter.RenderStatus(ctx, status)
+					err = presenter.RenderStatus(ctx, status, statusVerbose)
 					if err != nil {
 						return err
 					}
