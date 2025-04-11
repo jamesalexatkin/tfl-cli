@@ -4,7 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"jamesalexatkin/tfl-cli/internal"
+	"jamesalexatkin/tfl-cli/internal/presenter"
+	"jamesalexatkin/tfl-cli/internal/service"
 	"log"
 	"os"
 
@@ -33,9 +34,11 @@ func main() {
 
 	tflClient := tfl.New(*appID, *appKey)
 
-	service := internal.Service{
+	service := service.Service{
 		TFLClient: tflClient,
 	}
+
+	presenter := presenter.Presenter{}
 
 	cmd := &cli.Command{
 		Commands: []*cli.Command{
@@ -72,7 +75,7 @@ func main() {
 						return err
 					}
 
-					err = service.RenderDepartureBoard(ctx, *arrivals, DefaultWidth)
+					err = presenter.RenderDepartureBoard(ctx, *arrivals, DefaultWidth)
 					if err != nil {
 						return err
 					}

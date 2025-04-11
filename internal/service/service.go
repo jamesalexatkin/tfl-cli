@@ -1,10 +1,11 @@
-package internal
+package service
 
 import (
 	"context"
 	"fmt"
 	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -297,4 +298,19 @@ func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, ar
 	board.Platforms = platformsSlice
 
 	return board
+}
+
+func stripStationName(station string) string {
+	stringsToStrip := []string{
+		" Underground Station",
+		" Rail Station",
+		" (Berks)",
+	}
+
+	strippedStation := station
+	for _, s := range stringsToStrip {
+		strippedStation = strings.Split(strippedStation, s)[0]
+	}
+
+	return strippedStation
 }
