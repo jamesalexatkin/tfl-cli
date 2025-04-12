@@ -90,7 +90,12 @@ func main() {
 
 					stationName := cmd.Args().First()
 
-					if stationName == "" {
+					switch stationName {
+					case "home":
+						stationName = cfg.HomeStation
+					case "work":
+						stationName = cfg.WorkStation
+					case "":
 						fmt.Printf("") // TODO: print something here when there's no arg
 
 						// TODO: create NoStationError or MissingArgError
