@@ -39,6 +39,7 @@ func main() {
 	var statusVerbose bool
 
 	cmd := &cli.Command{
+		Name: "tfl",
 		Commands: []*cli.Command{
 			{
 				Name:  "show-config",
