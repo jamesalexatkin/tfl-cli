@@ -152,6 +152,8 @@ func getLine(line model.Line, verbose bool) string {
 			disruptionColor = *color.New(color.FgRed)
 		case "Reduced Service", "Part Suspended":
 			disruptionColor = *color.New(color.FgMagenta)
+		case "Service Closed":
+			disruptionColor = *color.New(color.FgBlue)
 		default:
 			disruptionColor = *color.New(color.FgWhite)
 		}
