@@ -66,7 +66,7 @@ You will need to configure API credentials here before fetching any data. These 
 | `work_station`        | Sets your default "work" station. Use with the `station` command.          |
 
 
-## 🛠️ Built With
+## 🛠️ Built with
 
 - [Go](https://golang.org/)
 - [urfave/cli](github.com/urfave/cli/v3) (for CLI)
