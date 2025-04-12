@@ -37,6 +37,18 @@ func (c Config) toMap() map[string]string {
 	}
 }
 
+func (c Config) Validate() error {
+	if c.AppID == "" || c.AppID == DefaultAppID {
+		return ConfigInvalidError{Field: "app_id"}
+	}
+
+	if c.AppKey == "" || c.AppKey == DefaultAppKey {
+		return ConfigInvalidError{Field: "app_key"}
+	}
+
+	return nil
+}
+
 func LoadConfig() (*Config, error) {
 	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("No existing config found, creating now")

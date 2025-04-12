@@ -61,6 +61,11 @@ func main() {
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
+					err := cfg.Validate()
+					if err != nil {
+						return err
+					}
+
 					status, err := service.GetStatus(ctx)
 					if err != nil {
 						return err
@@ -78,6 +83,11 @@ func main() {
 				Name:  "station",
 				Usage: "Show departures from a given station",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
+					err := cfg.Validate()
+					if err != nil {
+						return err
+					}
+
 					stationName := cmd.Args().First()
 
 					if stationName == "" {
