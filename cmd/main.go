@@ -10,17 +10,15 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/jamesalexatkin/tfl-golang"
-	"github.com/mattn/go-isatty"
-	"github.com/urfave/cli/v3"
+	tfl "github.com/jamesalexatkin/tfl-golang"
+	isatty "github.com/mattn/go-isatty"
+	cli "github.com/urfave/cli/v3"
 )
 
 func init() {
 	// Turn off color if not running in a proper terminal
 	color.NoColor = !isatty.IsTerminal(os.Stdout.Fd())
 }
-
-const DefaultWidth = 70
 
 func main() {
 	cfg, err := config.LoadConfig()
@@ -108,7 +106,7 @@ func main() {
 						return err
 					}
 
-					err = presenter.RenderDepartureBoard(ctx, *arrivals, DefaultWidth)
+					err = presenter.RenderDepartureBoard(ctx, *arrivals, cfg.DepartureBoardWidth)
 					if err != nil {
 						return err
 					}

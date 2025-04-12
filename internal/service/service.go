@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jamesalexatkin/tfl-golang"
+	tfl "github.com/jamesalexatkin/tfl-golang"
 )
 
 type Service struct {
