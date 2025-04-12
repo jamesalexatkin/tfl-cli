@@ -33,27 +33,6 @@ var exampleDepartureBoard = `
 └──────────────────────────────────────┘
 `
 
-var smallRoundel = `      
-       RRRRRRRRR          
-    RRRRR     RRRRR      
-   RRRR         RRRR   
- BBBBBBBBBBBBBBBBBBBBB 
- BBBBBBBBBBBBBBBBBBBBB 
-   RRRR         RRRR   
-    RRRRR     RRRRR     
-       RRRRRRRRR        
-
-`
-
-var tinyRoundel = `      
-      RRRRRR          
-    RRR    RRR       
-   BBBBBBBBBBBB        
-    RRR    RRR 
-      RRRRRR         
-
-`
-
 var ExampleStatusBoard = `
 ╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮
 │ London Underground        │             │ London Overground         │             │ ELIZABETH LINE            │             │ DLR                       │

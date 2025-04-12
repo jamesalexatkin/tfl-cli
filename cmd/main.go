@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"jamesalexatkin/tfl-cli/internal/config"
-	"jamesalexatkin/tfl-cli/internal/presenter"
-	"jamesalexatkin/tfl-cli/internal/service"
 	"log"
 	"os"
 
@@ -13,6 +10,9 @@ import (
 	tfl "github.com/jamesalexatkin/tfl-golang"
 	isatty "github.com/mattn/go-isatty"
 	cli "github.com/urfave/cli/v3"
+	"jamesalexatkin/tfl-cli/internal/config"
+	"jamesalexatkin/tfl-cli/internal/presenter"
+	"jamesalexatkin/tfl-cli/internal/service"
 )
 
 func init() {

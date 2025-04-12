@@ -19,6 +19,7 @@ const (
 	DefaultWorkStation         = "Liverpool Street"
 )
 
+// Config encapsulates configuration variables for the app.
 type Config struct {
 	AppID               string `json:"app_id"`
 	AppKey              string `json:"app_key"`
@@ -37,18 +38,21 @@ func (c Config) toMap() map[string]string {
 	}
 }
 
+// Validate checks the config to ensure it is valid.
 func (c Config) Validate() error {
 	if c.AppID == "" || c.AppID == DefaultAppID {
-		return ConfigInvalidError{Field: "app_id"}
+		return FieldInvalidError{Field: "app_id"}
 	}
 
 	if c.AppKey == "" || c.AppKey == DefaultAppKey {
-		return ConfigInvalidError{Field: "app_key"}
+		return FieldInvalidError{Field: "app_key"}
 	}
 
 	return nil
 }
 
+// LoadConfig looks for a config file to load into memory.
+// If there isn't one already, a new one is created with default values.
 func LoadConfig() (*Config, error) {
 	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("No existing config found, creating now")
@@ -61,7 +65,10 @@ func LoadConfig() (*Config, error) {
 			WorkStation:         DefaultWorkStation,
 		}
 
-		godotenv.Write(config.toMap(), fileName)
+		err = godotenv.Write(config.toMap(), fileName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err := godotenv.Load(fileName)

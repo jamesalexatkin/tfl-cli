@@ -2,14 +2,15 @@ package service
 
 import (
 	"context"
-	"jamesalexatkin/tfl-cli/internal/model"
 	"log/slog"
 	"strings"
 	"time"
 
 	tfl "github.com/jamesalexatkin/tfl-golang"
+	"jamesalexatkin/tfl-cli/internal/model"
 )
 
+// Service is used to fetch and marshal data from TfL's API.
 type Service struct {
 	TFLClient *tfl.Client
 }
@@ -44,6 +45,7 @@ func convertLine(s tfl.Status) model.Line {
 	return l
 }
 
+// GetStatus fetches the status for all lines.
 func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 	statuses, err := s.TFLClient.GetLineStatusByMode(ctx, []string{"tube", "overground", "elizabeth-line", "dlr"})
 	if err != nil {
@@ -108,15 +110,9 @@ func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 	return &tflStatus, nil
 }
 
-var box = `┌──────────────────────────────────┐
-│               %s                │
-├──────────────────────────────────┤
-│ %s │
-└──────────────────────────────────┘
-`
-
 /// STATION
 
+// FetchStationArrivalsBoard fetches the arrivals for a station and formats it into a board.
 func (s *Service) FetchStationArrivalsBoard(ctx context.Context, station string) (*model.Board, error) {
 	arrivals, err := s.fetchArrivals(ctx)
 	if err != nil {
@@ -162,7 +158,6 @@ func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, ar
 	platforms := map[string]model.Platform{}
 
 	for _, a := range arrivals {
-
 		if stripStationName(a.StationName) != station {
 			continue
 		}

@@ -3,19 +3,20 @@ package presenter
 import (
 	"context"
 	"fmt"
-	"jamesalexatkin/tfl-cli/internal/config"
-	"jamesalexatkin/tfl-cli/internal/model"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
+	"jamesalexatkin/tfl-cli/internal/config"
+	"jamesalexatkin/tfl-cli/internal/model"
 )
 
-type Presenter struct {
-}
+// Presenter is used to render data to the terminal.
+type Presenter struct{}
 
+// RenderConfig renders the current app configuration.
 func (p *Presenter) RenderConfig(ctx context.Context, cfg *config.Config) {
 	bold := color.New(color.Bold)
 	yellow := color.New(color.FgYellow)
@@ -79,6 +80,7 @@ func renderLine(line model.Line, verbose bool) {
 	// fmt.Println("─────────────────────────────────────────────")
 }
 
+// RenderStatus renders the current TfL status for all lines.
 func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus, verbose bool) error {
 	// bold := color.New(color.Bold)
 
@@ -174,7 +176,7 @@ func getLine(line model.Line, verbose bool) string {
 	return lineContent
 }
 
-func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus, verbose bool) error {
+func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus, verbose bool) {
 	bold := color.New(color.Bold)
 	italic := color.New(color.Italic)
 
@@ -288,10 +290,9 @@ func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus
 
 	italic.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
 	fmt.Println("")
-
-	return nil
 }
 
+// RenderDepartureBoard renders a departure board.
 func (p *Presenter) RenderDepartureBoard(ctx context.Context, b model.Board, width int) error {
 	// Deal with no data
 	if len(b.Platforms) == 0 {
@@ -326,12 +327,9 @@ func drawFrameLine(leftPiece string, rightPiece string, centreChar rune, width i
 	return leftPiece + strings.Repeat(string(centreChar), width-realLen(leftPiece+rightPiece)) + rightPiece
 }
 
-// realLen calculates the true length of a string as judged per character.
-// This is needed for two reasons:
-// 1. to escape ANSI strings (used for colouring);
-// 2. to properly count special Unicode chars which use multiple bytes (e.g. box-drawing chars) as only 1 character
+// 2. to properly count special Unicode chars which use multiple bytes (e.g. box-drawing chars) as only 1 character.
 func realLen(s string) int {
-	var ansiRegexp = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	ansiRegexp := regexp.MustCompile(`\x1b\[[0-9;]*m`)
 	ansiEscapedString := ansiRegexp.ReplaceAllString(s, "")
 
 	return len([]rune(ansiEscapedString))
@@ -362,6 +360,7 @@ func padRight(str string, length int) string {
 func centerText(width int, text string) string {
 	leftPadding := (width - realLen(text)) / 2
 	rightPadding := width - leftPadding - realLen(text)
+
 	return fmt.Sprintf("%*s%s%*s", leftPadding, "", text, rightPadding, "")
 }
 
@@ -377,17 +376,17 @@ func getPlatformStrings(p model.Platform, width int) []string {
 		// e.g. 'Eastbound - Platform 3' at North Acton
 		platformName = p.Name
 	}
-	header := fmt.Sprintf("%s  ", bold.Sprint(fmt.Sprintf("%s (%s)", platformName, p.LineName)))
+	header := bold.Sprint(fmt.Sprintf("%s (%s)", platformName, p.LineName)) + "  "
 
 	lines := []string{}
-	roundelTopContent := fmt.Sprintf("│ %s", roundel[0])
+	roundelTopContent := "│ " + roundel[0]
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelTopContent, generatePadding(' ', width-realLen(roundelTopContent)-1)))
 	// lines = append(lines, fmt.Sprintf("│ %s%s", roundel[0], "                               │"))
 	// lines = append(lines, fmt.Sprintf("│ %s %s", roundel[1], header))
 	roundelMiddleContent := fmt.Sprintf("│ %s %s", roundel[1], header)
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelMiddleContent, generatePadding(' ', width-realLen(roundelMiddleContent)-1)))
 	// lines = append(lines, fmt.Sprintf("│ %s%s", roundel[2], "                               │"))
-	roundelBottomContent := fmt.Sprintf("│ %s", roundel[2])
+	roundelBottomContent := "│ " + roundel[2]
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelBottomContent, generatePadding(' ', width-realLen(roundelBottomContent)-1)))
 	lines = append(lines, drawFrameLine("├", "┤", '─', width))
 
@@ -404,5 +403,6 @@ func getPlatformStrings(p model.Platform, width int) []string {
 	}
 
 	lines = append(lines, drawFrameLine("├", "┤", '─', width))
+
 	return lines
 }

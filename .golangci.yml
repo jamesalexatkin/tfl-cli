@@ -13,7 +13,9 @@ linters:
           allow:
             - $gostd
             - github.com/jamesalexatkin/tfl-golang
-            - github.com/stretchr/testify/require
+            - github.com/fatih/color
+            - github.com/mattn/go-isatty
+            - github.com/urfave/cli/v3
   exclusions:
     generated: lax
     presets:
