@@ -12,11 +12,16 @@ import (
 const fileName = ".tfl.env"
 
 const (
-	DefaultAppID               = "TODO"
-	DefaultAppKey              = "TODO"
+	// DefaultAppID is the default value for app ID.
+	DefaultAppID = "TODO"
+	// DefaultAppKey is the default value for app key.
+	DefaultAppKey = "TODO"
+	// DefaultDepartureBoardWidth is the default value for the departure board width.
 	DefaultDepartureBoardWidth = 70
-	DefaultHomeStation         = "Charing Cross"
-	DefaultWorkStation         = "Liverpool Street"
+	// DefaultHomeStation is the default value for the home station.
+	DefaultHomeStation = "Charing Cross"
+	// DefaultWorkStation is the default value for the work station.
+	DefaultWorkStation = "Liverpool Street"
 )
 
 // Config encapsulates configuration variables for the app.
