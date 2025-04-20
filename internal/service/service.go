@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"jamesalexatkin/tfl-cli/internal/model"
+	"github.com/jamesalexatkin/tfl-cli/internal/model"
 
 	tfl "github.com/jamesalexatkin/tfl-golang"
 )

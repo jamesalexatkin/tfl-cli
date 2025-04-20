@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"jamesalexatkin/tfl-cli/internal/config"
-	"jamesalexatkin/tfl-cli/internal/model"
+	"github.com/jamesalexatkin/tfl-cli/internal/config"
+	"github.com/jamesalexatkin/tfl-cli/internal/model"
 
 	"github.com/fatih/color"
 )

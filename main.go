@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	"jamesalexatkin/tfl-cli/internal/config"
-	"jamesalexatkin/tfl-cli/internal/presenter"
-	"jamesalexatkin/tfl-cli/internal/service"
+	"github.com/jamesalexatkin/tfl-cli/internal/config"
+	"github.com/jamesalexatkin/tfl-cli/internal/presenter"
+	"github.com/jamesalexatkin/tfl-cli/internal/service"
 
 	"github.com/fatih/color"
 	tfl "github.com/jamesalexatkin/tfl-golang"

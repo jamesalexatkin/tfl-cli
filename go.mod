@@ -1,4 +1,4 @@
-module jamesalexatkin/tfl-cli
+module github.com/jamesalexatkin/tfl-cli
 
 go 1.24.0
 
