@@ -5,6 +5,11 @@
 ![Status](assets/status_screenshot.png)
 
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/jamesalexatkin/tfl-cli.svg)](https://pkg.go.dev/github.com/jamesalexatkin/tfl-cli)
+[![GitHub License](https://img.shields.io/github/license/jamesalexatkin/tfl-cli)](https://github.com/jamesalexatkin/tfl-cli/blob/main/LICENSE)
+[![Build](https://github.com/jamesalexatkin/tfl-cli/actions/workflows/go.yml/badge.svg)](https://github.com/jamesalexatkin/tfl-cli/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jamesalexatkin/tfl-cli)](https://goreportcard.com/report/github.com/jamesalexatkin/tfl-cli)
+
 ## ✨ Features
 
 - Live status of TfL lines (Tube, Overground, Elizabeth Line, DLR)
@@ -29,7 +34,6 @@ tfl-cli status
 
 ### TODO - Line status (single line)
 
-
 ```bash
 tfl-cli status victoria
 ```
@@ -37,7 +41,7 @@ tfl-cli status victoria
 ### Live departures from a station
 
 ```bash
-tfl-cli station oxford-circus
+tfl-cli station 'Liverpool Street'
 ```
 
 ### Help
