@@ -20,6 +20,16 @@ func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 			Disc: color.RGB(239, 123, 16),
 			Bar:  color.New(color.FgBlue),
 		}
+	case "Elizabeth line", "elizabeth-line":
+		return RoundelColour{
+			Disc: color.New(color.FgMagenta),
+			Bar:  color.New(color.FgBlue),
+		}
+	case "DLR", "dlr":
+		return RoundelColour{
+			Disc: color.New(color.FgCyan),
+			Bar:  color.New(color.FgBlue),
+		}
 	// Tube
 	case "Bakerloo":
 		return RoundelColour{
@@ -106,18 +116,6 @@ func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 		return RoundelColour{
 			Disc: color.New(color.FgRed),
 			Bar:  color.New(color.FgRed),
-		}
-	// Elizabeth Line
-	case "Elizabeth line", "elizabeth-line":
-		return RoundelColour{
-			Disc: color.New(color.FgMagenta),
-			Bar:  color.New(color.FgBlue),
-		}
-	// DLR
-	case "DLR", "dlr":
-		return RoundelColour{
-			Disc: color.New(color.FgCyan),
-			Bar:  color.New(color.FgBlue),
 		}
 	default:
 		return RoundelColour{
