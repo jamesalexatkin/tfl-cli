@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"jamesalexatkin/tfl-cli/internal/config"
 	"jamesalexatkin/tfl-cli/internal/model"
+
+	"github.com/fatih/color"
 )
 
 // Presenter is used to render data to the terminal.
@@ -30,153 +31,8 @@ func (p *Presenter) RenderConfig(ctx context.Context, cfg *config.Config) {
 	fmt.Printf("%s: %s\n", yellow.Sprint("work_station"), bold.Sprint(cfg.WorkStation))
 }
 
-// func renderASCIIRoundel(discColour *color.Color, barColour *color.Color) {
-// 	for _, char := range tinyRoundel {
-// 		switch char {
-// 		case 'R':
-// 			discColour.Print("O")
-// 		case 'B':
-// 			barColour.Print("=")
-// 		case '\n':
-// 			fmt.Println("")
-// 		default:
-// 			fmt.Print(" ")
-// 		}
-
-// 	}
-// }
-
-func renderLine(line model.Line, verbose bool) {
-	roundelColour := model.CreateRoundelColourFromLineName(line.Name)
-	fmt.Print(
-		fmt.Sprintf("%s %s: ", roundelColour.Disc.Sprint("█"), color.New(color.Bold).Sprint(line.Name)),
-	)
-
-	for _, ls := range line.LineStatuses {
-		// fmt.Print("\t")
-
-		var disruptionColor color.Color
-		switch ls.StatusSeverityDescription {
-		case "Good Service":
-			disruptionColor = *color.New(color.FgGreen)
-		case "Minor Delays":
-			disruptionColor = *color.New(color.FgYellow)
-		case "Severe Delays":
-			disruptionColor = *color.New(color.FgRed)
-		case "Reduced Service", "Part Suspended":
-			disruptionColor = *color.New(color.FgMagenta)
-		default:
-			disruptionColor = *color.New(color.FgWhite)
-		}
-
-		disruptionColor.Print(ls.StatusSeverityDescription)
-
-		if ls.Reason != "" && verbose {
-			fmt.Printf(" - %s", ls.Reason)
-		}
-
-		fmt.Printf("\n")
-	}
-	// fmt.Println("─────────────────────────────────────────────")
-}
-
 // RenderStatus renders the current TfL status for all lines.
-func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus, verbose bool) error {
-	// bold := color.New(color.Bold)
-
-	// fmt.Println("╭───────────────────────────")
-	// bold.Println("LONDON UNDERGROUND")
-	// // renderASCIIRoundel(color.New(color.FgRed), color.New(color.FgBlue))
-	// tubeRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("tube"))
-	// for _, line := range tubeRoundel {
-	// 	fmt.Println(line)
-	// }
-	// renderLine(status.Underground.Bakerloo, verbose)
-	// renderLine(status.Underground.Central, verbose)
-	// renderLine(status.Underground.Circle, verbose)
-	// renderLine(status.Underground.District, verbose)
-	// renderLine(status.Underground.HammersmithAndCity, verbose)
-	// renderLine(status.Underground.Jubilee, verbose)
-	// renderLine(status.Underground.Metropolitan, verbose)
-	// renderLine(status.Underground.Northern, verbose)
-	// renderLine(status.Underground.Piccadilly, verbose)
-	// renderLine(status.Underground.Victoria, verbose)
-	// renderLine(status.Underground.WaterlooAndCity, verbose)
-
-	// fmt.Println("╭───────────────────────────")
-	// bold.Println("LONDON OVERGROUND")
-	// overgroundRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("overground"))
-	// for _, line := range overgroundRoundel {
-	// 	fmt.Println(line)
-	// }
-	// renderLine(status.Overground.Liberty, verbose)
-	// renderLine(status.Overground.Lioness, verbose)
-	// renderLine(status.Overground.Mildmay, verbose)
-	// renderLine(status.Overground.Suffragette, verbose)
-	// renderLine(status.Overground.Weaver, verbose)
-	// renderLine(status.Overground.Windrush, verbose)
-
-	// fmt.Println("┌───────────────────────────")
-	// bold.Println("ELIZABETH LINE")
-	// elizabethLineRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("elizabeth-line"))
-	// for _, line := range elizabethLineRoundel {
-	// 	fmt.Println(line)
-	// }
-	// renderLine(status.ElizabethLine, verbose)
-
-	// fmt.Println("┌───────────────────────────")
-	// bold.Println("DLR")
-	// dlrRoundel := getRoundelStrings(model.CreateRoundelColourFromLineName("dlr"))
-	// for _, line := range dlrRoundel {
-	// 	fmt.Println(line)
-	// }
-	// renderLine(status.DLR, verbose)
-
-	// fmt.Printf("(Correct as of %s)\n", status.Time.Format(time.DateTime))
-
-	p.renderNewStatus(ctx, status, verbose)
-
-	return nil
-}
-
-func getLine(line model.Line, verbose bool) string {
-	roundelColour := model.CreateRoundelColourFromLineName(line.Name)
-
-	disruption := ""
-	for _, ls := range line.LineStatuses {
-		var disruptionColor color.Color
-		switch ls.StatusSeverityDescription {
-		case "Good Service":
-			disruptionColor = *color.New(color.FgGreen)
-		case "Minor Delays":
-			disruptionColor = *color.New(color.FgYellow)
-		case "Severe Delays":
-			disruptionColor = *color.New(color.FgRed)
-		case "Reduced Service", "Part Suspended":
-			disruptionColor = *color.New(color.FgMagenta)
-		case "Service Closed":
-			disruptionColor = *color.New(color.FgBlue)
-		default:
-			disruptionColor = *color.New(color.FgWhite)
-		}
-
-		disruption = disruptionColor.Sprint(ls.StatusSeverityDescription)
-
-		// if ls.Reason != "" && verbose {
-		// 	fmt.Printf(" - %s", ls.Reason)
-		// }
-	}
-
-	lineContent := fmt.Sprintf("%s %s: %s",
-		roundelColour.Disc.Sprint("█"),
-		color.New(color.Bold).Sprint(line.Name),
-		disruption,
-	)
-
-	return lineContent
-}
-
-func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus, verbose bool) {
+func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus, verbose bool) {
 	bold := color.New(color.Bold)
 	italic := color.New(color.Italic)
 
@@ -292,6 +148,43 @@ func (p *Presenter) renderNewStatus(ctx context.Context, status *model.TfLStatus
 	fmt.Println("")
 }
 
+func getLine(line model.Line, verbose bool) string {
+	roundelColour := model.CreateRoundelColourFromLineName(line.Name)
+
+	disruption := ""
+	for _, ls := range line.LineStatuses {
+		var disruptionColor color.Color
+		switch ls.StatusSeverityDescription {
+		case "Good Service":
+			disruptionColor = *color.New(color.FgGreen)
+		case "Minor Delays":
+			disruptionColor = *color.New(color.FgYellow)
+		case "Severe Delays":
+			disruptionColor = *color.New(color.FgRed)
+		case "Reduced Service", "Part Suspended":
+			disruptionColor = *color.New(color.FgMagenta)
+		case "Part Closure", "Planned Closure", "Service Closed":
+			disruptionColor = *color.New(color.FgBlue)
+		default:
+			disruptionColor = *color.New(color.FgWhite)
+		}
+
+		disruption = disruptionColor.Sprint(ls.StatusSeverityDescription)
+
+		// if ls.Reason != "" && verbose {
+		// 	fmt.Printf(" - %s", ls.Reason)
+		// }
+	}
+
+	lineContent := fmt.Sprintf("%s %s: %s",
+		roundelColour.Disc.Sprint("█"),
+		color.New(color.Bold).Sprint(line.Name),
+		disruption,
+	)
+
+	return lineContent
+}
+
 // RenderDepartureBoard renders a departure board.
 func (p *Presenter) RenderDepartureBoard(ctx context.Context, b model.Board, width int) error {
 	// Deal with no data
@@ -381,11 +274,8 @@ func getPlatformStrings(p model.Platform, width int) []string {
 	lines := []string{}
 	roundelTopContent := "│ " + roundel[0]
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelTopContent, generatePadding(' ', width-realLen(roundelTopContent)-1)))
-	// lines = append(lines, fmt.Sprintf("│ %s%s", roundel[0], "                               │"))
-	// lines = append(lines, fmt.Sprintf("│ %s %s", roundel[1], header))
 	roundelMiddleContent := fmt.Sprintf("│ %s %s", roundel[1], header)
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelMiddleContent, generatePadding(' ', width-realLen(roundelMiddleContent)-1)))
-	// lines = append(lines, fmt.Sprintf("│ %s%s", roundel[2], "                               │"))
 	roundelBottomContent := "│ " + roundel[2]
 	lines = append(lines, fmt.Sprintf("%s%s│", roundelBottomContent, generatePadding(' ', width-realLen(roundelBottomContent)-1)))
 	lines = append(lines, drawFrameLine("├", "┤", '─', width))

@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	tfl "github.com/jamesalexatkin/tfl-golang"
 	"jamesalexatkin/tfl-cli/internal/model"
+
+	tfl "github.com/jamesalexatkin/tfl-golang"
 )
 
 // Service is used to fetch and marshal data from TfL's API.
@@ -21,26 +22,12 @@ func convertLine(s tfl.Status) model.Line {
 		Status: "Unknown",
 	}
 
-	// Handle empty list (shouldn't happen but you never know)
-	// if s.LineStatuses == nil {
-	// 	return l
-	// }
-
 	for _, ls := range s.LineStatuses {
 		l.LineStatuses = append(l.LineStatuses, model.LineStatus{
 			StatusSeverityDescription: ls.StatusSeverityDescription,
 			Reason:                    ls.Reason,
 		})
 	}
-
-	// // Sort out status
-	// l.Status = s.LineStatuses[0].StatusSeverityDescription
-
-	// // Sort out disruption
-	// switch l.Status {
-	// case "Minor Delays", "Severe Delays", "Part Closure":
-	// 	l.Disruption = &s.LineStatuses[0].Reason
-	// }
 
 	return l
 }

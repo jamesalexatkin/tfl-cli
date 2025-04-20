@@ -2,7 +2,7 @@
 
 *A fast and minimal terminal app to check Transport for London (TfL) status and live departures, written in Go.*
 
-![Demo](./assets/demo.gif)
+![Status](assets/status_screenshot.png)
 
 
 ## ✨ Features

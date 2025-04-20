@@ -6,13 +6,14 @@ import (
 	"log"
 	"os"
 
+	"jamesalexatkin/tfl-cli/internal/config"
+	"jamesalexatkin/tfl-cli/internal/presenter"
+	"jamesalexatkin/tfl-cli/internal/service"
+
 	"github.com/fatih/color"
 	tfl "github.com/jamesalexatkin/tfl-golang"
 	isatty "github.com/mattn/go-isatty"
 	cli "github.com/urfave/cli/v3"
-	"jamesalexatkin/tfl-cli/internal/config"
-	"jamesalexatkin/tfl-cli/internal/presenter"
-	"jamesalexatkin/tfl-cli/internal/service"
 )
 
 func init() {
@@ -70,10 +71,7 @@ func main() {
 						return err
 					}
 
-					err = presenter.RenderStatus(ctx, status, statusVerbose)
-					if err != nil {
-						return err
-					}
+					presenter.RenderStatus(ctx, status, statusVerbose)
 
 					return nil
 				},
