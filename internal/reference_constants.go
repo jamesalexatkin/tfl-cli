@@ -2,12 +2,14 @@ package internal
 
 // ASCII references
 
+//nolint:gochecknoglobals,unused
 var minisculeRoundel = `
  ╭───╮
 ───────
  ╰───╯
 `
 
+//nolint:gochecknoglobals,unused
 var exampleDepartureBoard = `
    ╭────────────────────────────────╮
 ┌──┤ %s                             ├──┐
@@ -33,7 +35,8 @@ var exampleDepartureBoard = `
 └──────────────────────────────────────┘
 `
 
-var ExampleStatusBoard = `
+//nolint:gochecknoglobals,unused
+var exampleStatusBoard = `
 ╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮             ╭───────────────────────────╮
 │ London Underground        │             │ London Overground         │             │ ELIZABETH LINE            │             │ DLR                       │
 ├───────────────────────────┴─────────────┼───────────────────────────┴─────────────┼───────────────────────────┴─────────────┼───────────────────────────┴─────────────┐

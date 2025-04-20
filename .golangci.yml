@@ -3,6 +3,7 @@ linters:
   default: all
   disable:
     - exhaustruct
+    - gochecknoinits
     - varnamelen
     - wrapcheck
     - wsl
@@ -16,6 +17,16 @@ linters:
             - github.com/fatih/color
             - github.com/mattn/go-isatty
             - github.com/urfave/cli/v3
+            - github.com/joho/godotenv
+            - github.com/jamesalexatkin/tfl-cli
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+    tagliatelle:
+      case:
+        rules:
+          json: snake
   exclusions:
     generated: lax
     presets:

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jamesalexatkin/tfl-cli/internal/model"
-
 	tfl "github.com/jamesalexatkin/tfl-golang"
 )
 
@@ -33,6 +32,8 @@ func convertLine(s tfl.Status) model.Line {
 }
 
 // GetStatus fetches the status for all lines.
+//
+//nolint:cyclop,funlen
 func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 	statuses, err := s.TFLClient.GetLineStatusByMode(ctx, []string{"tube", "overground", "elizabeth-line", "dlr"})
 	if err != nil {
@@ -100,13 +101,13 @@ func (s *Service) GetStatus(ctx context.Context) (*model.TfLStatus, error) {
 /// STATION
 
 // FetchStationArrivalsBoard fetches the arrivals for a station and formats it into a board.
-func (s *Service) FetchStationArrivalsBoard(ctx context.Context, station string) (*model.Board, error) {
+func (s *Service) FetchStationArrivalsBoard(ctx context.Context, station string, numDepartures int) (*model.Board, error) {
 	arrivals, err := s.fetchArrivals(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	board := s.convertArrivalsToBoard(ctx, station, arrivals)
+	board := s.convertArrivalsToBoard(ctx, station, arrivals, numDepartures)
 
 	return &board, nil
 }
@@ -137,7 +138,7 @@ func (s *Service) fetchArrivals(ctx context.Context) ([]tfl.Prediction, error) {
 	return totalArrivals, nil
 }
 
-func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, arrivals []tfl.Prediction) model.Board {
+func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, arrivals []tfl.Prediction, numDepartures int) model.Board {
 	board := model.Board{
 		StationName: station,
 	}
@@ -159,8 +160,8 @@ func (s *Service) convertArrivalsToBoard(ctx context.Context, station string, ar
 			}
 		}
 
-		// Cap at 4 departures
-		if len(currentPlatform.Departures) >= 4 {
+		// Cap at number of departures config setting
+		if len(currentPlatform.Departures) >= numDepartures {
 			continue
 		}
 

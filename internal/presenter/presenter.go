@@ -8,10 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/jamesalexatkin/tfl-cli/internal/config"
 	"github.com/jamesalexatkin/tfl-cli/internal/model"
-
-	"github.com/fatih/color"
 )
 
 // Presenter is used to render data to the terminal.
@@ -24,14 +23,16 @@ func (p *Presenter) RenderConfig(ctx context.Context, cfg *config.Config) {
 
 	fmt.Println("Current configuration:")
 
-	fmt.Printf("%s: %s\n", yellow.Sprint("app_id"), bold.Sprint(cfg.AppID))
-	fmt.Printf("%s: %s\n", yellow.Sprint("app_key"), bold.Sprint(cfg.AppKey))
-	fmt.Printf("%s: %s\n", yellow.Sprint("departure_board_width"), bold.Sprint(cfg.DepartureBoardWidth))
-	fmt.Printf("%s: %s\n", yellow.Sprint("home_station"), bold.Sprint(cfg.HomeStation))
-	fmt.Printf("%s: %s\n", yellow.Sprint("work_station"), bold.Sprint(cfg.WorkStation))
+	fmt.Printf("%s: %s\n", yellow.Sprint(config.AppIDConfigKey), bold.Sprint(cfg.AppID))
+	fmt.Printf("%s: %s\n", yellow.Sprint(config.AppKeyConfigKey), bold.Sprint(cfg.AppKey))
+	fmt.Printf("%s: %s\n", yellow.Sprint(config.DepartureBoardWidthConfigKey), bold.Sprint(cfg.DepartureBoardWidth))
+	fmt.Printf("%s: %s\n", yellow.Sprint(config.HomeStationConfigKey), bold.Sprint(cfg.HomeStation))
+	fmt.Printf("%s: %s\n", yellow.Sprint(config.WorkStationConfigKey), bold.Sprint(cfg.WorkStation))
 }
 
 // RenderStatus renders the current TfL status for all lines.
+//
+//nolint:funlen
 func (p *Presenter) RenderStatus(ctx context.Context, status *model.TfLStatus, verbose bool) {
 	bold := color.New(color.Bold)
 	italic := color.New(color.Italic)

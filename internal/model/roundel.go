@@ -2,11 +2,15 @@ package model
 
 import "github.com/fatih/color"
 
+// RoundelColour represents the colours of a roundel. This covers the colours of the disc and the central bar.
 type RoundelColour struct {
 	Disc *color.Color
 	Bar  *color.Color
 }
 
+// CreateRoundelColourFromLineName returns the appropriate roundel colours given the name of a line.
+//
+//nolint:cyclop,funlen
 func CreateRoundelColourFromLineName(lineName string) RoundelColour {
 	switch lineName {
 	// Modes

@@ -6,11 +6,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/jamesalexatkin/tfl-cli/internal/config"
 	"github.com/jamesalexatkin/tfl-cli/internal/presenter"
 	"github.com/jamesalexatkin/tfl-cli/internal/service"
-
-	"github.com/fatih/color"
 	tfl "github.com/jamesalexatkin/tfl-golang"
 	isatty "github.com/mattn/go-isatty"
 	cli "github.com/urfave/cli/v3"
@@ -21,6 +20,7 @@ func init() {
 	color.NoColor = !isatty.IsTerminal(os.Stdout.Fd())
 }
 
+//nolint:cyclop,funlen
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -99,7 +99,7 @@ func main() {
 						return nil
 					}
 
-					arrivals, err := service.FetchStationArrivalsBoard(ctx, stationName)
+					arrivals, err := service.FetchStationArrivalsBoard(ctx, stationName, cfg.NumDepartures)
 					if err != nil {
 						return err
 					}

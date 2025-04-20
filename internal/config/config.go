@@ -18,10 +18,30 @@ const (
 	DefaultAppKey = "TODO"
 	// DefaultDepartureBoardWidth is the default value for the departure board width.
 	DefaultDepartureBoardWidth = 70
+	// DefaultNumDepartures is the default values for the number of departures to display.
+	DefaultNumDepartures = 4
 	// DefaultHomeStation is the default value for the home station.
 	DefaultHomeStation = "Charing Cross"
 	// DefaultWorkStation is the default value for the work station.
 	DefaultWorkStation = "Liverpool Street"
+)
+
+// Key represents a key for a config value.
+type Key string
+
+const (
+	// AppIDConfigKey represents the key for the `app_id` field.
+	AppIDConfigKey Key = "app_id"
+	// AppKeyConfigKey represents the key for the `app_key` field.
+	AppKeyConfigKey Key = "app_key"
+	// DepartureBoardWidthConfigKey represents the key for the `departure_board_width` field.
+	DepartureBoardWidthConfigKey Key = "departure_board_width"
+	// NumDeparturesConfigKey represents the key for the `num_departures` field.
+	NumDeparturesConfigKey Key = "num_departures"
+	// HomeStationConfigKey represents the key for the `home_station` field.
+	HomeStationConfigKey Key = "home_station"
+	// WorkStationConfigKey represents the key for the `work_station` field.
+	WorkStationConfigKey Key = "work_station"
 )
 
 // Config encapsulates configuration variables for the app.
@@ -29,28 +49,30 @@ type Config struct {
 	AppID               string `json:"app_id"`
 	AppKey              string `json:"app_key"`
 	DepartureBoardWidth int    `json:"departure_board_width"`
+	NumDepartures       int    `json:"num_departures"`
 	HomeStation         string `json:"home_station"`
 	WorkStation         string `json:"work_station"`
 }
 
 func (c Config) toMap() map[string]string {
 	return map[string]string{
-		"app_id":                c.AppID, // TODO: extract keys for these into constants
-		"app_key":               c.AppKey,
-		"departure_board_width": strconv.FormatInt(int64(c.DepartureBoardWidth), 10),
-		"home_station":          c.HomeStation,
-		"work_station":          c.WorkStation,
+		string(AppIDConfigKey):               c.AppID,
+		string(AppKeyConfigKey):              c.AppKey,
+		string(DepartureBoardWidthConfigKey): strconv.FormatInt(int64(c.DepartureBoardWidth), 10),
+		string(NumDeparturesConfigKey):       strconv.FormatInt(int64(c.NumDepartures), 10),
+		string(HomeStationConfigKey):         c.HomeStation,
+		string(WorkStationConfigKey):         c.WorkStation,
 	}
 }
 
 // Validate checks the config to ensure it is valid.
 func (c Config) Validate() error {
 	if c.AppID == "" || c.AppID == DefaultAppID {
-		return FieldInvalidError{Field: "app_id"}
+		return FieldInvalidError{Field: AppIDConfigKey}
 	}
 
 	if c.AppKey == "" || c.AppKey == DefaultAppKey {
-		return FieldInvalidError{Field: "app_key"}
+		return FieldInvalidError{Field: AppKeyConfigKey}
 	}
 
 	return nil
@@ -66,6 +88,7 @@ func LoadConfig() (*Config, error) {
 			AppID:               DefaultAppID,
 			AppKey:              DefaultAppKey,
 			DepartureBoardWidth: DefaultDepartureBoardWidth,
+			NumDepartures:       DefaultNumDepartures,
 			HomeStation:         DefaultHomeStation,
 			WorkStation:         DefaultWorkStation,
 		}
@@ -81,16 +104,18 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	appID := os.Getenv("APP_ID")
-	appKey := os.Getenv("APP_KEY")
-	departureBoardWidth := getenvInt("DEPARTURE_BOARD_WIDTH", DefaultDepartureBoardWidth)
-	homeStation := os.Getenv("HOME_STATION")
-	workStation := os.Getenv("WORK_STATION")
+	appID := os.Getenv(string(AppIDConfigKey))
+	appKey := os.Getenv(string(AppKeyConfigKey))
+	departureBoardWidth := getenvInt(string(DepartureBoardWidthConfigKey), DefaultDepartureBoardWidth)
+	numDepartures := getenvInt(string(NumDeparturesConfigKey), DefaultNumDepartures)
+	homeStation := os.Getenv(string(HomeStationConfigKey))
+	workStation := os.Getenv(string(WorkStationConfigKey))
 
 	return &Config{
 		AppID:               appID,
 		AppKey:              appKey,
 		DepartureBoardWidth: departureBoardWidth,
+		NumDepartures:       numDepartures,
 		HomeStation:         homeStation,
 		WorkStation:         workStation,
 	}, nil

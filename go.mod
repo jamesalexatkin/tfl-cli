@@ -7,7 +7,7 @@ require (
 	github.com/jamesalexatkin/tfl-golang v0.0.0-20250411174443-cd4f934bcde1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-isatty v0.0.20
-	github.com/urfave/cli/v3 v3.1.1
+	github.com/urfave/cli/v3 v3.2.0
 )
 
 require (
